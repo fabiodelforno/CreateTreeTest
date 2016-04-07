@@ -7,6 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using System.IO;
+using Newtonsoft.Json.Schema;
 
 namespace CreateTreeTest
 {
@@ -118,8 +123,54 @@ namespace CreateTreeTest
             /**
              * l'albero è corretto se  
              * archi = nodi -1;(copertura)
+             * nessun nodo isolato ??
              * numero di nodi generati corretti(correttezza)
+             * numero di attributi corretti per arco e nodo
              */
+           
+           // StreamReader sr = File.OpenText(url.Text);
+           // JsonTextReader jr = new JsonTextReader(sr);
+            
+
+            schemaJson();
+
         }
+        
+        private void schemaJson()
+        {
+            string schemaJson = @"{
+                    'type': 'object',
+                    'properties': {
+                        'name': {'type':'string'},
+                        'roles': {'type': 'array'}
+                    }
+            }";
+
+            string JSON = @"{ 
+                    'name': 'pino', 
+                    'roles': ['Invalid content', 0.123456789] 
+                    } ";
+
+            JSchema schema = JSchema.Parse(schemaJson);
+            JObject person = JObject.Parse(JSON);
+            IList<string> messages;
+            bool valid = person.IsValid(schema, out messages);
+            Console.WriteLine(valid);
+            foreach(string outline in messages)
+            {
+                Console.WriteLine(outline);
+            }
+            //JsonTextReader reader = new JsonTextReader(new StringReader(JSON));
+            //JSchemaValidatingReader validatingReader = new JSchemaValidatingReader(reader);
+            //validatingReader.Schema = JSchema.Parse(schemaJson);
+            //IList<string> messages = new List<string>();
+            //validatingReader.va
+            //validatingReader.ValidationEventHandler += (o, a) => messages.Add(a.Message);
+            //bool isValid = (messages.Count == 0);
+            //Console.WriteLine(isValid);
+
+        }
+
+
     }
 }

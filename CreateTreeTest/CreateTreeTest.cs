@@ -20,8 +20,58 @@ namespace CreateTreeTest
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
+
+            numberBox.Clear();
+            attrNodoBox.Clear();
+            attrArcoBox.Clear();
+
             calculateNumberNode();
+            if (radioAttrDiversi.Checked)
+            {
+                printListAttrD();
+            }
+            if (radioAttrUguali.Checked)
+            {
+                printListAttrU();
+            }
+            
+        }
+        private void printListAttrD()
+        {
+            Random r = new Random();
+            int ranNodo = r.Next(1, 5);
+            int ranArco = r.Next(1, 5);
+            while ( ranArco==ranNodo )
+            {
+                ranArco = r.Next(1, 5);
+            }
+            printList(ranNodo, ranArco);
+        }
+
+        private void printListAttrU()
+        {
+            Random r = new Random();
+            int ranNodo = r.Next(1, 5);
+            printList(ranNodo, ranNodo);
+        }
+
+        private void printList(int n, int a)
+        {
+            int x = 1;
+            while (x < n + 1)
+            {
+                attrNodoBox.Show();
+                attrNodoBox.Paste("attrNodo" + x + "\n");
+                x++;
+            }
+            x = 1;
+            while (x < a + 1)
+            {
+                attrArcoBox.Show();
+                attrArcoBox.Paste("attrArco" + x + "\n");
+                x++;
+
+            }
         }
 
         private void calculateNumberNode()
@@ -48,8 +98,28 @@ namespace CreateTreeTest
                     Console.WriteLine("numero nodi senza root depth=2: " + nodi);
                 }
             }
-
+            numberBox.Paste(nodi.ToString());
+            numberBox.Show();
         }
-        
+
+        private void sfoglia_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openfd = new OpenFileDialog();
+            openfd.Filter = "json only.|*.json;";
+            DialogResult dr = openfd.ShowDialog();
+            url.Text = openfd.FileName;
+        }
+
+        private void validazione_Click(object sender, EventArgs e)
+        {
+            //validazione Json
+            //validazione correttezza dell'albero
+
+            /**
+             * l'albero è corretto se  
+             * archi = nodi -1;(copertura)
+             * numero di nodi generati corretti(correttezza)
+             */
+        }
     }
 }

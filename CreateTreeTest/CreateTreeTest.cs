@@ -135,41 +135,93 @@ namespace CreateTreeTest
             schemaJson();
 
         }
-        
-        private void schemaJson()
+
+        //è una forma corretta di json?
+        private async void schemaJson()
         {
-            string schemaJson = @"{
-                    'type': 'object',
-                    'properties': {
-                        'name': {'type':'string'},
-                        'roles': {'type': 'array'}
-                    }
-            }";
 
-            string JSON = @"{ 
-                    'name': 'pino', 
-                    'roles': ['Invalid content', 0.123456789] 
-                    } ";
-
-            JSchema schema = JSchema.Parse(schemaJson);
-            JObject person = JObject.Parse(JSON);
-            IList<string> messages;
-            bool valid = person.IsValid(schema, out messages);
-            Console.WriteLine(valid);
-            foreach(string outline in messages)
+            //la validazione viene fatta vertice per vertice
+            string result = null;
+            string resultTmp = null;
+            StreamReader sr = File.OpenText(url.Text);
+            infoProgress.Visible = true;
+            infoProgress.Text = "opening file...";
+            //Console.WriteLine("opening file...");
+            //leggi la prima riga e controlla 
+            //if( await sr.ReadLineAsync() != "[" )
+            //{
+            //    Console.WriteLine("not Json file");
+            //    return;
+            //}
+            infoProgress.Text = "check file json...";
+            if (await sr.ReadLineAsync() != "{") { Console.WriteLine("syntax error"); }
+            while ( (resultTmp = await sr.ReadLineAsync()) != "}" )
             {
-                Console.WriteLine(outline);
+                //if( resultTmp != "{") { Console.WriteLine("syntax error"); }   
+                //leggi fino a [
+                while ((resultTmp = await sr.ReadLineAsync()).Trim() != "{" ) ;
+                result += resultTmp;
+                //legge tutti i vertici con gli attributi
+                while ((resultTmp = await sr.ReadLineAsync()).Trim() != "]," && resultTmp.Trim() != "]")
+                {
+                    result = result + resultTmp;
+                    //leggi da { fino a }, identifica un vertice con gli attributi
+                    while ((resultTmp = await sr.ReadLineAsync()).Trim() != "]")
+                    {
+                        result = result + resultTmp;
+                    }
+                    result = result + resultTmp;
+                    resultTmp = await sr.ReadLineAsync();
+                    if (resultTmp.Trim() != "},")
+                    {
+                        if(resultTmp.Trim() != "}")
+                        {
+                            Console.WriteLine("syntax error");
+                            return;
+                        }
+                    }
+                    result = result + "}";
+                    //Console.WriteLine("" + result);
+                    //Console.WriteLine(" "+IsValidJson(result));
+                    //if (!IsValidJson(result))
+                    //{
+                    //    Console.WriteLine("" + result);
+                    //}
+                    await Task.Run(() => IsValidJson(result));
+                    result = null;
+                    resultTmp = null;
+                }
+                
             }
-            //JsonTextReader reader = new JsonTextReader(new StringReader(JSON));
-            //JSchemaValidatingReader validatingReader = new JSchemaValidatingReader(reader);
-            //validatingReader.Schema = JSchema.Parse(schemaJson);
-            //IList<string> messages = new List<string>();
-            //validatingReader.va
-            //validatingReader.ValidationEventHandler += (o, a) => messages.Add(a.Message);
-            //bool isValid = (messages.Count == 0);
-            //Console.WriteLine(isValid);
+            infoProgress.Text = "Finito, controlla il report!";
 
         }
+
+        //check valid json file
+        private static bool IsValidJson(string strInput)
+        {
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object 
+                (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array 
+            {
+                try {
+                    var obj = JToken.Parse(strInput);
+                    return true;
+                } catch (JsonReaderException jex) {
+                    //Exception in parsing json 
+                    Console.WriteLine(jex.Message);
+                    return false;
+                } catch (Exception ex)
+                {
+                    //some other exception 
+                    Console.WriteLine(ex.ToString());
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
+        } 
 
 
     }

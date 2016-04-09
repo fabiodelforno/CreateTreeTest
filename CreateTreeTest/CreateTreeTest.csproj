@@ -54,18 +54,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attribute.cs" />
     <Compile Include="CreateTreeTest.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CreateTreeTest.Designer.cs">
       <DependentUpon>CreateTreeTest.cs</DependentUpon>
     </Compile>
-    <Compile Include="Edge.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tree.cs" />
-    <Compile Include="Vertex.cs" />
+    <Compile Include="ReportCreateTree.cs" />
     <EmbeddedResource Include="CreateTreeTest.resx">
       <DependentUpon>CreateTreeTest.cs</DependentUpon>
     </EmbeddedResource>

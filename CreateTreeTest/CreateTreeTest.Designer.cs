@@ -206,7 +206,7 @@
             // infoProgress
             // 
             this.infoProgress.AutoSize = true;
-            this.infoProgress.Location = new System.Drawing.Point(120, 256);
+            this.infoProgress.Location = new System.Drawing.Point(85, 256);
             this.infoProgress.Name = "infoProgress";
             this.infoProgress.Size = new System.Drawing.Size(35, 13);
             this.infoProgress.TabIndex = 22;

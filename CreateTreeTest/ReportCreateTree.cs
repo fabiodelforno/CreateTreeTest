@@ -34,9 +34,9 @@ namespace CreateTreeTest
         public void initReport(List<string> result)
         {
 
-            DateTime thisDay = DateTime.Today;
-            TimeZone localZone = TimeZone.CurrentTimeZone;
-            string init = "" + thisDay.ToString("D") + "ora: " + localZone + "\n";
+            DateTime thisDay = DateTime.Now;
+           
+            string init = "" + thisDay + "\n";
             string input = "Albero: " + this.NameTree + "\n" +" Depth: " + this.Depth +
                            " Split-Size: " + this.Split_Size + " | " + " AttributiNodo: "
                            + this.AttrNodo + " AttributiArco: " + this.AttrArco + " | " +" Numero di nodi: " +this.NumberNodi + "\n";

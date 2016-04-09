@@ -173,7 +173,7 @@ namespace CreateTreeTest
                 if (!sentinella)
                 {
                     nameTree = resultTmp.Substring(15).Remove(resultTmp.Substring(15).Count() - 2);
-                    //Console.WriteLine("" + nameTree);
+                    Console.WriteLine("" + nameTree);
                     report.NameTree = nameTree;
                     sentinella = true;
                 }

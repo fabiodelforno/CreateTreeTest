@@ -17,11 +17,16 @@ namespace CreateTreeTest
 {
     public partial class CreateTreeTest : Form
     {
+        int ranNodo = 0;
+        int ranArco = 0;
+        List<string> error = new List<string>();
+
         public CreateTreeTest()
         {
             InitializeComponent();
             
         }
+       
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -44,8 +49,8 @@ namespace CreateTreeTest
         private void printListAttrD()
         {
             Random r = new Random();
-            int ranNodo = r.Next(1, 5);
-            int ranArco = r.Next(1, 5);
+            ranNodo = r.Next(1, 5);
+            ranArco = r.Next(1, 5);
             while ( ranArco==ranNodo )
             {
                 ranArco = r.Next(1, 5);
@@ -89,20 +94,22 @@ namespace CreateTreeTest
             {
                 nodi = (int)Math.Pow(split_size, depth - 1);
                 nodi += split_size;
-                Console.WriteLine("numero nodi senza root: " + nodi);
+                //Console.WriteLine("numero nodi senza root: " + nodi);
             }else
             {
                 if(split_size == 2)
                 {
                     nodi = (int)Math.Pow(split_size, depth) - 1;
-                    Console.WriteLine("numero nodi senza root split=2: " + nodi);
+                    //Console.WriteLine("numero nodi senza root split=2: " + nodi);
                 }
                 else
                 {
                     nodi += split_size;
-                    Console.WriteLine("numero nodi senza root depth=2: " + nodi);
+                    //Console.WriteLine("numero nodi senza root depth=2: " + nodi);
                 }
             }
+            //nodo root
+            nodi += 1;
             numberBox.Paste(nodi.ToString());
             numberBox.Show();
         }
@@ -117,48 +124,60 @@ namespace CreateTreeTest
 
         private void validazione_Click(object sender, EventArgs e)
         {
-            //validazione Json
+            //validazione Json OK
             //validazione correttezza dell'albero
-
+            
+            //ToDo
             /**
              * l'albero è corretto se  
              * archi = nodi -1;(copertura)
              * nessun nodo isolato ??
-             * numero di nodi generati corretti(correttezza)
-             * numero di attributi corretti per arco e nodo
-             */
-           
-           // StreamReader sr = File.OpenText(url.Text);
-           // JsonTextReader jr = new JsonTextReader(sr);
-            
+             * numero di nodi generati corretti(correttezza) OK
+             * numero di attributi corretti per arco e nodo  OK
+             */      
 
             schemaJson();
 
         }
+        
 
         //è una forma corretta di json?
         private async void schemaJson()
         {
 
-            //la validazione viene fatta vertice per vertice
+            //la validazione viene svolta a blocchi di oggetti e array
             string result = null;
             string resultTmp = null;
+            bool cheked = false;
+            string nameTree = "";
+            bool sentinella = false;
             StreamReader sr = File.OpenText(url.Text);
             infoProgress.Visible = true;
             infoProgress.Text = "opening file...";
-            //Console.WriteLine("opening file...");
-            //leggi la prima riga e controlla 
-            //if( await sr.ReadLineAsync() != "[" )
-            //{
-            //    Console.WriteLine("not Json file");
-            //    return;
-            //}
+         
+           
+            //instanzia report
+            ReportCreateTree report = new ReportCreateTree();
+            report.Depth = int.Parse(depthBox.Text);
+            report.Split_Size = int.Parse(splitBox.Text);
+            report.AttrNodo = ranNodo;
+            report.AttrArco = ranArco;
+            report.NumberNodi = int.Parse(numberBox.Text);
+            report.State = true;
+
             infoProgress.Text = "check file json...";
-            if (await sr.ReadLineAsync() != "{") { Console.WriteLine("syntax error"); }
+            if (await sr.ReadLineAsync() != "{") { error.Add("manca una { riga 1 posizione 1"); }
             while ( (resultTmp = await sr.ReadLineAsync()) != "}" )
             {
-                //if( resultTmp != "{") { Console.WriteLine("syntax error"); }   
-                //leggi fino a [
+
+                if (!sentinella)
+                {
+                    nameTree = resultTmp.Substring(15).Remove(resultTmp.Substring(15).Count() - 2);
+                    //Console.WriteLine("" + nameTree);
+                    report.NameTree = nameTree;
+                    sentinella = true;
+                }
+                
                 while ((resultTmp = await sr.ReadLineAsync()).Trim() != "{" ) ;
                 result += resultTmp;
                 //legge tutti i vertici con gli attributi
@@ -176,30 +195,33 @@ namespace CreateTreeTest
                     {
                         if(resultTmp.Trim() != "}")
                         {
-                            Console.WriteLine("syntax error");
+                            Console.WriteLine("manca una } verso la fine del file");
+                            error.Add("manca una } verso la fine del file");
                             return;
                         }
                     }
                     result = result + "}";
-                    //Console.WriteLine("" + result);
-                    //Console.WriteLine(" "+IsValidJson(result));
-                    //if (!IsValidJson(result))
-                    //{
-                    //    Console.WriteLine("" + result);
-                    //}
-                    await Task.Run(() => IsValidJson(result));
+                  
+                    cheked = await Task.Run(() => IsValidJson(result));
+                    if (!cheked) {
+                        Console.WriteLine("" + cheked + ""+ error);
+                        report.State = false; 
+                    }
                     result = null;
                     resultTmp = null;
                 }
                 
             }
+            infoProgress.Text = "init report...";
+            report.initReport(error);
             infoProgress.Text = "Finito, controlla il report!";
-
+ 
         }
-
+        
         //check valid json file
-        private static bool IsValidJson(string strInput)
+        private bool IsValidJson(string strInput)
         {
+            
             strInput = strInput.Trim();
             if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object 
                 (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array 
@@ -210,14 +232,18 @@ namespace CreateTreeTest
                 } catch (JsonReaderException jex) {
                     //Exception in parsing json 
                     Console.WriteLine(jex.Message);
+                    error.Add(jex.Message);
                     return false;
                 } catch (Exception ex)
                 {
                     //some other exception 
                     Console.WriteLine(ex.ToString());
+                    error.Add(ex.ToString());
                     return false;
                 }
             } else {
+                Console.WriteLine("Manca una parentesi [ oppure {");
+                error.Add("Manca una parentesi [ oppure {");
                 return false;
             }
 

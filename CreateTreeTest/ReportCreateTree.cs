@@ -46,7 +46,7 @@ namespace CreateTreeTest
             {
                 error = item + "\n";
             }
-            string endLine = "+++++++++++++++++++++++++++++++++++++\n";
+            string endLine = "\n+++++++++++++++++++++++++++++++++++++\n";
 
             writeReport(init+input+repo+error+endLine);
             error = "";
